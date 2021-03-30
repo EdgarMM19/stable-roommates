@@ -17,8 +17,11 @@ using vvb = vector<vb>;
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
 
-
+// irvings algorithm: https://iq.opengenus.org/stable-roommates-problem/
+// https://uvacs2102.github.io/docs/roomates.pdf
+// https://en.wikipedia.org/wiki/Stable_roommates_problem
 vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
+
     // preferencesOrder[i][j] indicates the j preference of i 
     // preferencesMap[i][j] indicates the preference position of j in i lists
     vector<map<int, int> > preferencesMap(n);
@@ -41,15 +44,17 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             nextProposal[actProposer]++;
             if(actualAccepted[nextChoice] < preferencesMap[nextChoice][actProposer]){
                 // not accepted has to continue
-                cout << nextChoice+1 << " rejected " << actProposer+1 << endl;
+                cerr << nextChoice+1 << " rejected " << actProposer+1 << endl;
             }else{
                 if(actualAccepted[nextChoice] == n){
-                    cout << nextChoice+1 << " accepts for first time and its " << actProposer+1 << endl;
+                    // accepted by someone that is its first proposal
+                    cerr << nextChoice+1 << " accepts for first time and its " << actProposer+1 << endl;
                     actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
                     finish = true;
                 }else{
+                    // accepted by someone that has to reject other proposal
                     int aux = preferencesOrder[nextChoice][actualAccepted[nextChoice]];
-                    cout << nextChoice+1 << " accepts " << actProposer+1 << " and rejects "  << aux+1 << endl;
+                    cerr << nextChoice+1 << " accepts " << actProposer+1 << " and rejects "  << aux+1 << endl;
                     actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
                     actProposer = aux;
                 }
@@ -57,7 +62,8 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         } while(not finish);
     }
     for(int i = 0; i < n; ++i)
-        cout << actualAccepted[i]+1 << " " << i+1 << endl;
+        cerr << actualAccepted[i]+1 << " " << i+1 << endl;
+    
     vvb preStable(n, vb(n-1, true));
     for(int i = 0; i < n; ++i){
         int whoAccepted = preferencesOrder[i][nextProposal[i]-1];
@@ -74,8 +80,8 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
                 stable[i].push_back(preferencesOrder[i][j]);
             
     for(auto x : preStable){
-        for(auto y : x) cout << y << " ";
-        cout << endl;
+        for(auto y : x) cerr << y << " ";
+        cerr << endl;
     }
     return vii();
 }
@@ -135,10 +141,10 @@ int main(){
     vii matches = solveSR(n, preferences, hasSolution);
     if(hasSolution){
         for(ii x : matches){
-            cout << x.F << " <3 " << x.S << endl;
+            cerr << x.F << " <3 " << x.S << endl;
         }
     }
     else{
-        cout << "no solution" << endl;
+        cerr << "no solution" << endl;
     }
 }
