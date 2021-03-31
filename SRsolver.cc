@@ -67,34 +67,29 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             preStable[otherWay][preferencesMap[otherWay][whoAccepted]] = false;
         }
     }
-    //vvi stable(n);
-    //for(int i = 0; i < n; ++i)
-    //for(int j = 0; j < n; ++j)
-    //        if(preStable[i][j])
-    //            stable[i].push_back(preferencesOrder[i][j]);
-    vi noRejecteds(n, 0);
-    for(int i = 0; i < n; ++i)        
-        for(int j = 0; j < n-1; ++j)
-            noRejecteds[i] += preStable[i][j];
-    for(auto x : noRejecteds){
-        if(x == 0){
-            hasSolution = false;
-            return vii();
-        }
-    }
-    //vi leftPref(n), rightPref(n);
-    //for(int& x : leftPref) x = 0;
-    //for(int i = 0; i < n; ++i){
-    //    rightPref[i] = stable[i].size()-1;
-    //    assert(rightPref[i] >= 0);
-    //}
+    vvi stable(n);
+    for(int i = 0; i < n; ++i)
+    for(int j = 0; j < n; ++j)
+        if(preStable[i][j])
+            stable[i].push_back(preferencesOrder[i][j]);
+ 
    
+    vi leftPref(n), rightPref(n);
+    for(int& x : leftPref) x = 0;
+    for(int i = 0; i < n; ++i){
+        if(stable[i] == 0){
+            hasSolution = false;
+            return vii(); 
+        }
+        rightPref[i] = stable[i].size()-1;
+
+    }
+    
     int finish = false;
     while(not finish){
         finish = true;
         for(int i = 0; i < n; ++i){
-            //if(rightPref[i] != leftPref[i]){
-            if(noRejecteds[i] > 1){
+            if(rightPref[i] != leftPref[i]){
                 finish = false;
                 vi visited(n, -1);
                 int pi = i;
@@ -102,57 +97,40 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
                 int step = 0;
 
                 while(visited[pi] == -1){
+
                     pis.push_back(pi);
                     visited[pi] = step;
                     step++;
-                    int second = 0;
-                    while(not preStable[pi][second]) second++;
-                    second++;
-                    while(not preStable[pi][second]) second++;
-                    int qi = preferencesOrder[pi][second];
-                    int last = n-2;
-                    while(not preStable[qi][last]) last--;
-                    pi = preferencesOrder[qi][last];
+                    // aixo esta mal:
+                    int qi = stable[pi][leftPref[pi]+1];
+                    pi = stable[qi][rightPref[qi]];
                 }
 
                 for(int j = visited[pi]; j < pis.size(); ++j){
+                    // aixo esta mal:
                     int ai = pis[j];
-                    int first = 0;
-                    while(not preStable[ai][first]) first++;
-                    preStable[ai][first] = false;
-                    noRejecteds[ai]--;
-                    if(noRejecteds[ai] == 0){
-                        hasSolution = false;
-                        return vii();     
-                    }
-                    int bi = preferencesOrder[ai][first];
-                    preStable[bi][preferencesMap[bi][ai]] = 0;
+                    leftPref[ai]++;
+                    int bi = stable[ai][leftPref];
 
-                    noRejecteds[bi]--;
-                    if(noRejecteds[bi] == 0){
-                        hasSolution = false;
-                        return vii();     
-                    }
                     // is this okey??
-                    //while(rightPref[bi] >= leftPref[bi] and stable[bi][rightPref[bi]] != ai){
-                   //     rightPref[bi]--;
-                   // }
+                    while(rightPref[bi] >= leftPref[bi] and stable[bi][rightPref[bi]] != ai){
+                        rightPref[bi]--;
+                   }
                     // and this?
-                   // if(rightPref[bi] < leftPref[bi]){
-                    //    hasSolution = false;
-                   //     return vii();     
-                   // }
+                    if(rightPref[bi] < leftPref[bi]){
+                       hasSolution = false;
+                       return vii();     
+                   }
                     //assert(rightPref[bi] >= 0);
                     //rightPref[bi]--;
 
                 }
-            
-                for(auto x : noRejecteds){
-                    if(x == 0){
+                for(int i = 0; i < n; ++i)
+                    if(leftPref[i] > rightPref[i]){
                         hasSolution = false;
                         return vii();
                     }
-                }
+                
                 break;
             }
         }
@@ -160,9 +138,7 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
     vii pairs;
     hasSolution = true;
     for(int i = 0; i < n; ++i)
-        for(int j = 0; j < n-1; ++j)
-            if(preStable[i][j])
-                pairs.push_back(ii({i, preferencesOrder[i][j]}));
+        pairs.push_back(ii({i, stable[i][leftPref[i]]}));
     return pairs;
 }
 
