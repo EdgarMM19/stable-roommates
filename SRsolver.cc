@@ -29,7 +29,6 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         for(int j = 0; j < n-1; ++j)
             preferencesMap[i][preferencesOrder[i][j]] = j;
     }
-
     vi nextProposal(n,0);
     vi actualAccepted(n,n);
     for(int i = 0; i < n; ++i){
@@ -44,25 +43,20 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             nextProposal[actProposer]++;
             if(actualAccepted[nextChoice] < preferencesMap[nextChoice][actProposer]){
                 // not accepted has to continue
-                cerr << nextChoice+1 << " rejected " << actProposer+1 << endl;
             }else{
                 if(actualAccepted[nextChoice] == n){
                     // accepted by someone that is its first proposal
-                    cerr << nextChoice+1 << " accepts for first time and its " << actProposer+1 << endl;
                     actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
                     finish = true;
                 }else{
                     // accepted by someone that has to reject other proposal
                     int aux = preferencesOrder[nextChoice][actualAccepted[nextChoice]];
-                    cerr << nextChoice+1 << " accepts " << actProposer+1 << " and rejects "  << aux+1 << endl;
                     actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
                     actProposer = aux;
                 }
             }
         } while(not finish);
     }
-    for(int i = 0; i < n; ++i)
-        cerr << actualAccepted[i]+1 << " " << i+1 << endl;
     
     vvb preStable(n, vb(n-1, true));
     for(int i = 0; i < n; ++i){
@@ -73,78 +67,172 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             preStable[otherWay][preferencesMap[otherWay][whoAccepted]] = false;
         }
     }
-    vvi stable(n);
-    for(int i = 0; i < n; ++i)
-        for(int j = 0; j < n; ++j)
-            if(preStable[i][j])
-                stable[i].push_back(preferencesOrder[i][j]);
-            
-    for(auto x : preStable){
-        for(auto y : x) cerr << y << " ";
-        cerr << endl;
+    //vvi stable(n);
+    //for(int i = 0; i < n; ++i)
+    //for(int j = 0; j < n; ++j)
+    //        if(preStable[i][j])
+    //            stable[i].push_back(preferencesOrder[i][j]);
+    vi noRejecteds(n, 0);
+    for(int i = 0; i < n; ++i)        
+        for(int j = 0; j < n-1; ++j)
+            noRejecteds[i] += preStable[i][j];
+    for(auto x : noRejecteds){
+        if(x == 0){
+            hasSolution = false;
+            return vii();
+        }
     }
-    return vii();
+    //vi leftPref(n), rightPref(n);
+    //for(int& x : leftPref) x = 0;
+    //for(int i = 0; i < n; ++i){
+    //    rightPref[i] = stable[i].size()-1;
+    //    assert(rightPref[i] >= 0);
+    //}
+   
+    int finish = false;
+    while(not finish){
+        finish = true;
+        for(int i = 0; i < n; ++i){
+            //if(rightPref[i] != leftPref[i]){
+            if(noRejecteds[i] > 1){
+                finish = false;
+                vi visited(n, -1);
+                int pi = i;
+                vi pis;
+                int step = 0;
+
+                while(visited[pi] == -1){
+                    pis.push_back(pi);
+                    visited[pi] = step;
+                    step++;
+                    int second = 0;
+                    while(not preStable[pi][second]) second++;
+                    second++;
+                    while(not preStable[pi][second]) second++;
+                    int qi = preferencesOrder[pi][second];
+                    int last = n-2;
+                    while(not preStable[qi][last]) last--;
+                    pi = preferencesOrder[qi][last];
+                }
+
+                for(int j = visited[pi]; j < pis.size(); ++j){
+                    int ai = pis[j];
+                    int first = 0;
+                    while(not preStable[ai][first]) first++;
+                    preStable[ai][first] = false;
+                    noRejecteds[ai]--;
+                    if(noRejecteds[ai] == 0){
+                        hasSolution = false;
+                        return vii();     
+                    }
+                    int bi = preferencesOrder[ai][first];
+                    preStable[bi][preferencesMap[bi][ai]] = 0;
+
+                    noRejecteds[bi]--;
+                    if(noRejecteds[bi] == 0){
+                        hasSolution = false;
+                        return vii();     
+                    }
+                    // is this okey??
+                    //while(rightPref[bi] >= leftPref[bi] and stable[bi][rightPref[bi]] != ai){
+                   //     rightPref[bi]--;
+                   // }
+                    // and this?
+                   // if(rightPref[bi] < leftPref[bi]){
+                    //    hasSolution = false;
+                   //     return vii();     
+                   // }
+                    //assert(rightPref[bi] >= 0);
+                    //rightPref[bi]--;
+
+                }
+            
+                for(auto x : noRejecteds){
+                    if(x == 0){
+                        hasSolution = false;
+                        return vii();
+                    }
+                }
+                break;
+            }
+        }
+    }
+    vii pairs;
+    hasSolution = true;
+    for(int i = 0; i < n; ++i)
+        for(int j = 0; j < n-1; ++j)
+            if(preStable[i][j])
+                pairs.push_back(ii({i, preferencesOrder[i][j]}));
+    return pairs;
 }
 
 
 int main(){
-    int n;
-    cin >> n; //has to be even
+    for(int n = 2; n < 100; n+=2){
+    //int n;
+    //cin >> n; //has to be even
+        cout << "??" << endl;
     vvi preferences(n);
     for(int i = 0; i < n; ++i){
         preferences[i] = generateRandomPermutation(n-1, 0);
         for(int& x : preferences[i]){
             if(x >= i) x++;
+            assert(x >= 0 and x < n and x != i);
         }
     }
+    cout << "!!" << endl;
     bool hasSolution;
-    n = 6;
+   /*n = 6;
     preferences = vvi(6, vi(5));
-    preferences[0][0] = 4;
+    preferences[0][0] = 2;
     preferences[0][1] = 6;
-    preferences[0][2] = 2;
-    preferences[0][3] = 5;
-    preferences[0][4] = 3;
+    preferences[0][2] = 4;
+    preferences[0][3] = 3;
+    preferences[0][4] = 5;
 
-    preferences[1][0] = 6;
-    preferences[1][1] = 3;
-    preferences[1][2] = 5;
-    preferences[1][3] = 1;
+    preferences[1][0] = 3;
+    preferences[1][1] = 5;
+    preferences[1][2] = 1;
+    preferences[1][3] = 6;
     preferences[1][4] = 4;
 
-    preferences[2][0] = 4;
-    preferences[2][1] = 5;
-    preferences[2][2] = 1;
-    preferences[2][3] = 6;
-    preferences[2][4] = 2;
+    preferences[2][0] = 1;
+    preferences[2][1] = 6;
+    preferences[2][2] = 2;
+    preferences[2][3] = 5;
+    preferences[2][4] = 4;
 
-    preferences[3][0] = 2;
-    preferences[3][1] = 6;
-    preferences[3][2] = 5;
-    preferences[3][3] = 1;
-    preferences[3][4] = 3;
+    preferences[3][0] = 5;
+    preferences[3][1] = 2;
+    preferences[3][2] = 3;
+    preferences[3][3] = 6;
+    preferences[3][4] = 1;
 
-    preferences[4][0] = 4;
-    preferences[4][1] = 6;
+    preferences[4][0] = 6;
+    preferences[4][1] = 1;
     preferences[4][2] = 3;
-    preferences[4][3] = 6;
-    preferences[4][4] = 1;
+    preferences[4][3] = 4;
+    preferences[4][4] = 2;
     
-    preferences[5][0] = 5;
-    preferences[5][1] = 1;
-    preferences[5][2] = 4;
-    preferences[5][3] = 2;
-    preferences[5][4] = 3;
+    preferences[5][0] = 4;
+    preferences[5][1] = 2;
+    preferences[5][2] = 5;
+    preferences[5][3] = 1;
+    preferences[5][4] = 3;*/
 
-    for(auto& x : preferences)
-        for(auto& y : x) y--;
+    //for(auto& x : preferences)
+    //    for(auto& y : x) y--;
+    cout << n << ": " << endl;
     vii matches = solveSR(n, preferences, hasSolution);
     if(hasSolution){
-        for(ii x : matches){
-            cerr << x.F << " <3 " << x.S << endl;
+        cout << "yes" << endl;
+       /* for(ii x : matches){
+            if(x.F < x.S)
+            cerr << x.F+1 << " <3 " << x.S+1 << endl;
         }
-    }
+*/    }
     else{
         cerr << "no solution" << endl;
+    }
     }
 }
