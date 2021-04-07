@@ -17,17 +17,14 @@ using vvb = vector<vb>;
 
 #define DEBUG(CTR) cerr << #CTR << ": "; for (auto x : CTR) cerr << x << ", "; cerr << endl;
 
-int randomNumber(int n);
-vector<int> generateRandomPermutation(int len, bool startAtOne);
-
 // irvings algorithm: https://iq.opengenus.org/stable-roommates-problem/
 // https://uvacs2102.github.io/docs/roomates.pdf
 // https://en.wikipedia.org/wiki/Stable_roommates_problem
 vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
-    cerr << "startSR" << endl;
-    for(auto x : preferencesOrder){
+    //cerr << "start solveSR... preferencesOrder is:" << endl;
+    /*for(auto x : preferencesOrder){
         DEBUG(x)
-    }
+    }*/
     // preferencesOrder[i][j] indicates the j preference of i 
     // preferencesMap[i][j] indicates the preference position of j in i lists
     vector<vector<int>> preferencesMap(n, vector<int>(n, -1));
@@ -35,9 +32,10 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         for (int j = 0; j < n-1; ++j)
             preferencesMap[i][preferencesOrder[i][j]] = j;
     }
-    for (auto x : preferencesMap) {
+    //cerr << "preferencesMap is: " << endl;
+    /*for (auto x : preferencesMap) {
         DEBUG(x)
-    }
+    }*/
     vi nextProposal(n,0);
     vi actualAccepted(n,n);
 
@@ -53,7 +51,6 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             int nextChoice = preferencesOrder[actProposer][nextProposal[actProposer]];
             int howPreferedIsActForNext = preferencesMap[nextChoice][actProposer];
             nextProposal[actProposer]++;
-                                                                cerr << "binary6" << endl;
 
             if (actualAccepted[nextChoice] < howPreferedIsActForNext){
                 // not accepted has to continue
@@ -88,12 +85,18 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         }
 
     }
+
+    /*for (auto pst : preStable) {
+        DEBUG(pst);
+    }*/
+
     vvi stable(n);
     for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-        if (preStable[i][j])
-            stable[i].push_back(preferencesOrder[i][j]);
+        for (int j = 0; j < n-1; ++j)
+            if (preStable[i][j])
+                stable[i].push_back(preferencesOrder[i][j]);
  
+
     vi leftPref(n, 0), rightPref(n);
     for (int i = 0; i < n; ++i){
         if (stable[i].size() == 0){
@@ -103,53 +106,83 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         rightPref[i] = stable[i].size()-1;
     }
     // JAVIER ENTEN FINS AQUI
-    int finish = false;
-    cerr << "stable phase" << endl;
-    for(auto x : stable){
-        DEBUG(x)
+    /*cerr << "stable phase" << endl;
+    for(auto st : stable){
+        DEBUG(st)
     }
+    DEBUG(leftPref);
+    DEBUG(rightPref);
     cerr << "stable phase1" << endl;
-
-    while (not finish){
-        finish = true;
+    */
+    while (true){
         int pi = -1;
         for (int i = 0; i < n; ++i){
             if (rightPref[i] != leftPref[i]){
-                finish = false;
                 pi = i;
                 break;
             }
         }
         if (pi == -1) break;
-        cerr << "pi " << pi << endl;
         vi visited(n, -1);
         vi pis;
         int step = 0;
 
-        while (visited[pi] == -1){
+        /*cerr << "Pi: " << pi << endl;
+        for (int k=0; k<n; k++) {
+            cerr << "stable right: ";
+            for (int d=leftPref[k]; d<=rightPref[k]; d++) {
+                cerr << stable[k][d] << ", ";
+            }
+            cerr << endl;
+        }*/
 
+        while (visited[pi] == -1){
             pis.push_back(pi);
             visited[pi] = step;
             step++;
             // aixo esta mal:
+            if (leftPref[pi] == rightPref[pi]) {
+                hasSolution = false;
+                return vii();
+            }
             int qi = stable[pi][leftPref[pi]+1];
             pi = stable[qi][rightPref[qi]];
+            //DEBUG(pis)
         }
 
-        DEBUG(pis);
+        //DEBUG(pis);
 
         int initSize = pis.size();
         reverse(pis.begin(), pis.end());
         while (pis.size() != initSize - visited[pi]) pis.pop_back();
         reverse(pis.begin(), pis.end());
         
+        //DEBUG(pis);
         for (int j = 0; j < pis.size(); ++j){
+            //DEBUG(leftPref);
+            //DEBUG(rightPref);
+
+            /*for (int k=0; k<n; k++) {
+                cerr << "stable right: ";
+                for (int d=leftPref[k]; d<=rightPref[k]; d++) {
+                    cerr << stable[k][d] << ", ";
+                }
+                cerr << endl;
+            }*/
+
             int ai = pis[j];
             int bi = stable[ai][leftPref[ai]];
             int ci = stable[ai][leftPref[ai]+1];
-            while (stable[ci][rightPref[ci]] != ai) rightPref[ci]--;
+            //cerr << ai << "  ) " << bi << " - " << ci << endl;
+            //DEBUG(pis);
+
+            while (rightPref[ci] >= 0 and stable[ci][rightPref[ci]] != ai) rightPref[ci]--;
             leftPref[ai]++;
-            if (rightPref[bi] < leftPref[bi] or rightPref[ai] < leftPref[ai]) {
+            //cerr << endl;
+
+            //DEBUG(leftPref);
+            //DEBUG(rightPref);
+            if (rightPref[ci] < leftPref[ci] or rightPref[ai] < leftPref[ai]) {
                 hasSolution = false;
                 return vii();
             }
