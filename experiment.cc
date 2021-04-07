@@ -19,12 +19,13 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 500
-#define num_iteracions 200
+#define num_persones 8
+#define num_iteracions 20
 
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
 bool solveSR(int n, const vvi& preferencesOrder, vii& solution);
+bool backSR(int n, const vvi& preferencesOrder);
 
 double Pn (int n){
     //Pn ~ e*(1/sqrt(pi))*(2/n)^1/4
@@ -54,9 +55,17 @@ map<int,vector<double>> experiment(){
             if (solveSR(2*n, instancia, possible_sol)) {
                 //cerr << "yes" << endl;
                 amb_solucio++;
+                //if(not backSR(2*n, instancia)){
+                //    cout << "no nhi ha!" << endl;
+                //}
+                //else cout << "correcte" << endl;
             } else {
                 //cerr << "no" << endl;
                 //char bas; cin >> bas;
+                //if(backSR(2*n, instancia)){
+                //    cout << "nhi ha!!" << endl;
+                //}
+                //else cout << "correcte" << endl;
             }
         }
         //Afegim els resultats a l'estructura de dades
