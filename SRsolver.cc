@@ -21,8 +21,8 @@ using vvb = vector<vb>;
 // https://uvacs2102.github.io/docs/roomates.pdf
 // https://en.wikipedia.org/wiki/Stable_roommates_problem
 bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
-    //cerr << "start solveSR... preferencesOrder is:" << endl;
-    /*for(auto x : preferencesOrder){
+    /*cerr << "start solveSR... preferencesOrder is:" << endl;
+    for(auto x : preferencesOrder){
         DEBUG(x)
     }*/
     // preferencesOrder[i][j] indicates the j preference of i 
@@ -32,17 +32,21 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         for (int j = 0; j < n-1; ++j)
             preferencesMap[i][preferencesOrder[i][j]] = j;
     }
-    //cerr << "preferencesMap is: " << endl;
-    /*for (auto x : preferencesMap) {
+    /*cerr << "preferencesMap is: " << endl;
+    for (auto x : preferencesMap) {
         DEBUG(x)
     }*/
     vi nextProposal(n,0);
     vi actualAccepted(n,n);
 
     for (int i = 0; i < n; ++i){
+        
+
         int actProposer = i;
         bool finish = false;
         do{
+            //DEBUG(nextProposal);
+            //cerr << actProposer << endl;
             if (nextProposal[actProposer] == n-1){
                 return false;
             }
@@ -103,7 +107,6 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         }
         rightPref[i] = stable[i].size()-1;
     }
-    // JAVIER ENTEN FINS AQUI
     /*cerr << "stable phase" << endl;
     for(auto st : stable){
         DEBUG(st)
@@ -140,6 +143,8 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
             step++;
             // aixo esta mal:
             if (leftPref[pi] == rightPref[pi]) {
+                cout << "Input basura" << endl;
+                char bas; cin >> bas;
                 return false;
             }
             int qi = stable[pi][leftPref[pi]+1];
@@ -154,13 +159,19 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         while (pis.size() != initSize - visited[pi]) pis.pop_back();
         reverse(pis.begin(), pis.end());
         
+        vi Bs, Cs;
+        for (auto ai : pis) {
+            Bs.push_back(stable[ai][leftPref[ai]]);
+            Cs.push_back(stable[ai][leftPref[ai]+1]);   
+        }
+
         //DEBUG(pis);
         for (int j = 0; j < pis.size(); ++j){
             //DEBUG(leftPref);
             //DEBUG(rightPref);
 
             /*for (int k=0; k<n; k++) {
-                cerr << "stable right: ";
+                cerr << "stable right inner: ";
                 for (int d=leftPref[k]; d<=rightPref[k]; d++) {
                     cerr << stable[k][d] << ", ";
                 }
@@ -168,13 +179,24 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
             }*/
 
             int ai = pis[j];
-            int bi = stable[ai][leftPref[ai]];
-            int ci = stable[ai][leftPref[ai]+1];
+            int bi = Bs[j];
+            int ci = Cs[j];
             //cerr << ai << "  ) " << bi << " - " << ci << endl;
             //DEBUG(pis);
 
-            while (rightPref[ci] >= 0 and stable[ci][rightPref[ci]] != ai) rightPref[ci]--;
-            leftPref[ai]++;
+            while (stable[ci][rightPref[ci]] != ai) {
+                int bo = stable[ci][rightPref[ci]];
+                //cerr << "Elimninant el " << bo << endl;
+                bool flag = false;
+                for (int i=leftPref[bo]; i+1<=rightPref[bo]; i++) {
+                    if (!flag and stable[bo][i] == ci) flag = true;
+                    if (flag) stable[bo][i] = stable[bo][i+1];
+                }
+                rightPref[bo] -= flag;
+                rightPref[ci]--;
+            }
+            leftPref[ai] += (stable[ai][leftPref[ai]] == bi);
+;
             //cerr << endl;
 
             //DEBUG(leftPref);
