@@ -2,12 +2,15 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <cassert>
 //#include "randomGenerators.cc"
 //#include "SRsolver.cc"
 using namespace std;
 
 /*Una instancia aleatoria es una vector de vectores con 
 las preferencias (una permutacion random) de cada persona.*/
+
+#define DEBUG(CTR) cerr << #CTR << ": "; for (auto x : CTR) cerr << x << ", "; cerr << endl;
 
 using vi = vector<int>;
 using vvi = vector<vi>;
@@ -16,28 +19,25 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 50
-#define num_iteracions 20
+#define num_persones 10
+#define num_iteracions 2000
 
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
 vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution);
 
-
-
 double Pn (int n){
     //Pn ~ e*(1/sqrt(pi))*(2/n)^1/4
-    return exp(1) * (double)1/sqrt(M_PI) * pow(2/n,1/4);
+    return exp(1.0) * (double)1.0/sqrt(1.0*M_PI) * pow(2.0/n,1.0/4.0);
 }
 
 map<int,vector<double>> experiment(){
     //Experimentem per conjunts de 2 a 100 persones
     map<int,vector<double>> resultats; 
-    for (int n = 1; n < num_persones; ++n){
+    for (int n = 1; n <= num_persones; ++n){
         double amb_solucio = 0;
         //Probabilitat estimada de tenir solució
         double prob_n = Pn(n);
-
         //Fem 20 experiments per conjunt
         for (int i = 0; i < num_iteracions; ++i){ 
             vvi instancia;
@@ -46,13 +46,16 @@ map<int,vector<double>> experiment(){
                 vi persona = generateRandomPermutation(2*n-1,false);
                 for (int& x : persona){
                     if (x >= j) x++;
-                assert(x >= 0 and x < 2*n and x != j);
-            }
+                    assert(x >= 0 and x < 2*n and x != j);
+                }
                 instancia.push_back(persona);
             }
             bool has_solution;
-            vii possible_sol = solveSR(2*n,instancia,has_solution);
+
+            vii possible_sol = solveSR(2*n, instancia, has_solution);
             if (has_solution) amb_solucio++;
+            //cout << "Ins results: " << has_solution;
+            //char bas; cin >> bas;
         }
         //Afegim els resultats a l'estructura de dades
         double prob_real = amb_solucio/num_iteracions;
@@ -65,9 +68,10 @@ map<int,vector<double>> experiment(){
 }
 
 int main(){
+    srand(0);
+
     map<int,vector<double>> resultats = experiment();
     for(auto x : resultats){
         cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
     }
 }
-
