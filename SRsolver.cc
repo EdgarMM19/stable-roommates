@@ -24,7 +24,10 @@ vector<int> generateRandomPermutation(int len, bool startAtOne);
 // https://uvacs2102.github.io/docs/roomates.pdf
 // https://en.wikipedia.org/wiki/Stable_roommates_problem
 vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
-
+    cerr << "startSR" << endl;
+    for(auto x : preferencesOrder){
+        DEBUG(x)
+    }
     // preferencesOrder[i][j] indicates the j preference of i 
     // preferencesMap[i][j] indicates the preference position of j in i lists
     vector<vector<int>> preferencesMap(n, vector<int>(n, -1));
@@ -37,31 +40,40 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
     }
     vi nextProposal(n,0);
     vi actualAccepted(n,n);
+
     for (int i = 0; i < n; ++i){
         int actProposer = i;
         bool finish = false;
         do{
-            if (nextProposal[actProposer] == n){
+            if (nextProposal[actProposer] == n-1){
                 hasSolution = false;
                 return vii();
             }
+
             int nextChoice = preferencesOrder[actProposer][nextProposal[actProposer]];
             int howPreferedIsActForNext = preferencesMap[nextChoice][actProposer];
             nextProposal[actProposer]++;
+                                                                cerr << "binary6" << endl;
+
             if (actualAccepted[nextChoice] < howPreferedIsActForNext){
                 // not accepted has to continue
+
             } else {
                 if (actualAccepted[nextChoice] == n){
+
                     // accepted by someone that is its first proposal
                     actualAccepted[nextChoice] = howPreferedIsActForNext;
                     finish = true;
+
                 } else {
+
                     // accepted by someone that has to reject other proposal
                     int aux = preferencesOrder[nextChoice][actualAccepted[nextChoice]];
                     actualAccepted[nextChoice] = howPreferedIsActForNext;
                     actProposer = aux;
                 }
             }
+
         } while (not finish);
     }
 
@@ -71,10 +83,11 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         for (int j = preferencesMap[whoAccepted][i] +1; j < n-1; ++j){
             preStable[whoAccepted][j] = false;
             int otherWay = preferencesOrder[whoAccepted][j];
+            //cerr << n << " " << j << " " << whoAccepted << " " << otherWay << " " << preferencesMap[otherWay][whoAccepted] << endl;
             preStable[otherWay][preferencesMap[otherWay][whoAccepted]] = false;
         }
-    }
 
+    }
     vvi stable(n);
     for (int i = 0; i < n; ++i)
     for (int j = 0; j < n; ++j)
@@ -91,6 +104,12 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
     }
     // JAVIER ENTEN FINS AQUI
     int finish = false;
+    cerr << "stable phase" << endl;
+    for(auto x : stable){
+        DEBUG(x)
+    }
+    cerr << "stable phase1" << endl;
+
     while (not finish){
         finish = true;
         int pi = -1;
@@ -102,7 +121,7 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             }
         }
         if (pi == -1) break;
-
+        cerr << "pi " << pi << endl;
         vi visited(n, -1);
         vi pis;
         int step = 0;
@@ -145,8 +164,9 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
 }
 
 
+/*
 int main(){
-    /*
+    
     int n;
     cin >> n; //has to be even
     cout << "??" << endl;
@@ -159,7 +179,7 @@ int main(){
         }
     }
     cout << "!!" << endl;
-    */
+    
     int n = 6;
     vvi preferences(n, vi(n-1));
 
@@ -213,3 +233,4 @@ int main(){
         cerr << "no solution" << endl;
     }
 }
+*/

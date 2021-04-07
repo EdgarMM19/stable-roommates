@@ -2,8 +2,8 @@
 #include <vector>
 #include <map>
 #include <cmath>
-#include "randomGenerators.cc"
-#include "SRsolver.cc"
+//#include "randomGenerators.cc"
+//#include "SRsolver.cc"
 using namespace std;
 
 /*Una instancia aleatoria es una vector de vectores con 
@@ -43,7 +43,11 @@ map<int,vector<double>> experiment(){
             vvi instancia;
             // Generem la instancia per un experiment en concret
             for (int j = 0; j < 2*n; j++){
-                vi persona = generateRandomPermutation(2*n,true);
+                vi persona = generateRandomPermutation(2*n-1,false);
+                for (int& x : persona){
+                    if (x >= j) x++;
+                assert(x >= 0 and x < 2*n and x != j);
+            }
                 instancia.push_back(persona);
             }
             bool has_solution;
@@ -55,11 +59,15 @@ map<int,vector<double>> experiment(){
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
+        //cout << prob_n << " " << prob_real << " " << error << endl;
     }
     return resultats;
 }
 
-/*int main(){
+int main(){
     map<int,vector<double>> resultats = experiment();
-}*/
+    for(auto x : resultats){
+        cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
+    }
+}
 
