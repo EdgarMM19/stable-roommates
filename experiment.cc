@@ -19,7 +19,7 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 300
+#define num_persones 100
 #define num_iteracions 2000
 
 int randomNumber(int n);
@@ -51,9 +51,13 @@ map<int,vector<double>> experiment(){
                 instancia.push_back(persona);
             }
             vii possible_sol;
-            if (solveSR(2*n, instancia, possible_sol)) amb_solucio++;
-            //cout << "Ins results: " << has_solution;
-            //char bas; cin >> bas;
+            if (solveSR(2*n, instancia, possible_sol)) {
+                //cerr << "yes" << endl;
+                amb_solucio++;
+            } else {
+                //cerr << "no" << endl;
+                //char bas; cin >> bas;
+            }
         }
         //Afegim els resultats a l'estructura de dades
         double prob_real = amb_solucio/num_iteracions;
@@ -70,6 +74,6 @@ int main(){
 
     map<int,vector<double>> resultats = experiment();
     for(auto x : resultats){
-        cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
+        //cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
     }
 }
