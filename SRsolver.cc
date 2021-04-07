@@ -99,13 +99,18 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
             if (preStable[i][j])
                 stable[i].push_back(preferencesOrder[i][j]);
  
+    preferencesMap = vvi(n, vi(n, -1));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<stable[i].size(); j++) preferencesMap[i][stable[i][j]] = j;
+    }
 
-    vi leftPref(n, 0), rightPref(n);
+    vi leftPref(n, 0), secondPref(n, 1), rightPref(n);
     for (int i = 0; i < n; ++i){
         if (stable[i].size() == 0){
             return false;
         }
         rightPref[i] = stable[i].size()-1;
+        if (rightPref[i] == 0) secondPref[i] = 0;
     }
     /*cerr << "stable phase" << endl;
     for(auto st : stable){
@@ -132,7 +137,7 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         for (int k=0; k<n; k++) {
             cerr << "stable right: ";
             for (int d=leftPref[k]; d<=rightPref[k]; d++) {
-                cerr << stable[k][d] << ", ";
+                if(stable[k][d] != -1) cerr << stable[k][d] << ", ";
             }
             cerr << endl;
         }*/
@@ -147,7 +152,8 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
                 char bas; cin >> bas;
                 return false;
             }
-            int qi = stable[pi][leftPref[pi]+1];
+            int punter = secondPref[pi];
+            int qi = stable[pi][punter];
             pi = stable[qi][rightPref[qi]];
             //DEBUG(pis)
         }
@@ -162,7 +168,8 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         vi Bs, Cs;
         for (auto ai : pis) {
             Bs.push_back(stable[ai][leftPref[ai]]);
-            Cs.push_back(stable[ai][leftPref[ai]+1]);   
+            int punter = secondPref[ai];
+            Cs.push_back(stable[ai][punter]);   
         }
 
         //DEBUG(pis);
@@ -186,24 +193,25 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
 
             while (stable[ci][rightPref[ci]] != ai) {
                 int bo = stable[ci][rightPref[ci]];
-                //cerr << "Elimninant el " << bo << endl;
-                bool flag = false;
-                for (int i=leftPref[bo]; i+1<=rightPref[bo]; i++) {
-                    if (!flag and stable[bo][i] == ci) flag = true;
-                    if (flag) stable[bo][i] = stable[bo][i+1];
-                }
-                rightPref[bo] -= flag;
+                if (bo != -1) stable[bo][preferencesMap[bo][ci]] = -1;
                 rightPref[ci]--;
             }
             leftPref[ai] += (stable[ai][leftPref[ai]] == bi);
-;
+
+            for (int i=0; i<n; i++) {
+                while (stable[i][rightPref[i]] == -1) rightPref[i]--;
+                while (stable[i][leftPref[i]] == -1) leftPref[i]++;
+                secondPref[i] = leftPref[i]+1;
+                while (secondPref[i] < rightPref[i] and stable[i][secondPref[i]] == -1) secondPref[i]++;
+             
+                if (rightPref[i] < leftPref[i] or rightPref[i] < leftPref[i]) {
+                    return false;
+                }
+            }
             //cerr << endl;
 
             //DEBUG(leftPref);
             //DEBUG(rightPref);
-            if (rightPref[ci] < leftPref[ci] or rightPref[ai] < leftPref[ai]) {
-                return false;
-            }
         }
     }
 

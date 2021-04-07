@@ -19,7 +19,7 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 500
+#define num_persones 100
 #define num_iteracions 200
 
 int randomNumber(int n);
