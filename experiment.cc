@@ -19,8 +19,8 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 100
-#define num_iteracions 2000
+#define num_persones 500
+#define num_iteracions 200
 
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
@@ -64,7 +64,8 @@ map<int,vector<double>> experiment(){
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
-        cout << n << " " << prob_n << " " << prob_real << " " << error << endl;
+        cout << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
+        cerr << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
     }
     return resultats;
 }
