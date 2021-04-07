@@ -22,14 +22,13 @@ std::mt19937 gen(seed);
 std::uniform_int_distribution<int> distrib(0, int((1LL<<32)-1));
 
 int randomNumber(int n){
-    return (distrib(gen)%n+n)%n;
+    return rand()%n;
 }
 
 vector<int> generateRandomPermutation(int len, bool startAtOne){
     //https://en.wikipedia.org/wiki/Fisher–Yates_shuffle
     vector<int> v(len);
-    for(int i = 0; i < len; ++i)
-        v[i] = i + startAtOne;
+    for(int i = 0; i < len; ++i) v[i] = i + startAtOne;
     for(int i = len-1; i >= 1; --i){
         int j = randomNumber(i+1);
         swap(v[i], v[j]);
