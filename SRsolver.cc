@@ -20,7 +20,7 @@ using vvb = vector<vb>;
 // irvings algorithm: https://iq.opengenus.org/stable-roommates-problem/
 // https://uvacs2102.github.io/docs/roomates.pdf
 // https://en.wikipedia.org/wiki/Stable_roommates_problem
-vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
+bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
     //cerr << "start solveSR... preferencesOrder is:" << endl;
     /*for(auto x : preferencesOrder){
         DEBUG(x)
@@ -44,8 +44,7 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
         bool finish = false;
         do{
             if (nextProposal[actProposer] == n-1){
-                hasSolution = false;
-                return vii();
+                return false;
             }
 
             int nextChoice = preferencesOrder[actProposer][nextProposal[actProposer]];
@@ -100,8 +99,7 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
     vi leftPref(n, 0), rightPref(n);
     for (int i = 0; i < n; ++i){
         if (stable[i].size() == 0){
-            hasSolution = false;
-            return vii(); 
+            return false;
         }
         rightPref[i] = stable[i].size()-1;
     }
@@ -142,8 +140,7 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             step++;
             // aixo esta mal:
             if (leftPref[pi] == rightPref[pi]) {
-                hasSolution = false;
-                return vii();
+                return false;
             }
             int qi = stable[pi][leftPref[pi]+1];
             pi = stable[qi][rightPref[qi]];
@@ -183,17 +180,16 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
             //DEBUG(leftPref);
             //DEBUG(rightPref);
             if (rightPref[ci] < leftPref[ci] or rightPref[ai] < leftPref[ai]) {
-                hasSolution = false;
-                return vii();
+                return false;
             }
         }
     }
 
     vii pairs;
-    hasSolution = true;
     for (int i = 0; i < n; ++i)
         pairs.push_back(ii({i, stable[i][leftPref[i]]}));
-    return pairs;
+    solution = pairs;
+    return true;
 }
 
 

@@ -19,12 +19,12 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
-#define num_persones 10
+#define num_persones 300
 #define num_iteracions 2000
 
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
-vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution);
+bool solveSR(int n, const vvi& preferencesOrder, vii& solution);
 
 double Pn (int n){
     //Pn ~ e*(1/sqrt(pi))*(2/n)^1/4
@@ -50,10 +50,8 @@ map<int,vector<double>> experiment(){
                 }
                 instancia.push_back(persona);
             }
-            bool has_solution;
-
-            vii possible_sol = solveSR(2*n, instancia, has_solution);
-            if (has_solution) amb_solucio++;
+            vii possible_sol;
+            if (solveSR(2*n, instancia, possible_sol)) amb_solucio++;
             //cout << "Ins results: " << has_solution;
             //char bas; cin >> bas;
         }
@@ -62,7 +60,7 @@ map<int,vector<double>> experiment(){
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
-        //cout << prob_n << " " << prob_real << " " << error << endl;
+        cout << n << " " << prob_n << " " << prob_real << " " << error << endl;
     }
     return resultats;
 }
