@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
-using namespace std;
+#include <algorithm>
 
+using namespace std;
 
 #define F first
 #define S second
@@ -14,6 +15,8 @@ using vii = vector<ii>;
 using vb = vector<bool>;
 using vvb = vector<vb>;
 
+#define DEBUG(CTR) cerr << #CTR << ": "; for (auto x : CTR) cerr << x << ", "; cerr << endl;
+
 int randomNumber(int n);
 vector<int> generateRandomPermutation(int len, bool startAtOne);
 
@@ -24,191 +27,189 @@ vii solveSR(int n, const vvi& preferencesOrder, bool& hasSolution){
 
     // preferencesOrder[i][j] indicates the j preference of i 
     // preferencesMap[i][j] indicates the preference position of j in i lists
-    vector<map<int, int> > preferencesMap(n);
-    for(int i = 0; i < n; ++i){
-        for(int j = 0; j < n-1; ++j)
+    vector<vector<int>> preferencesMap(n, vector<int>(n, -1));
+    for (int i = 0; i < n; ++i){
+        for (int j = 0; j < n-1; ++j)
             preferencesMap[i][preferencesOrder[i][j]] = j;
+    }
+    for (auto x : preferencesMap) {
+        DEBUG(x)
     }
     vi nextProposal(n,0);
     vi actualAccepted(n,n);
-    for(int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i){
         int actProposer = i;
         bool finish = false;
         do{
-            if(nextProposal[actProposer] == n){
-                    hasSolution = false;
-                    return vii();
+            if (nextProposal[actProposer] == n){
+                hasSolution = false;
+                return vii();
             }
             int nextChoice = preferencesOrder[actProposer][nextProposal[actProposer]];
+            int howPreferedIsActForNext = preferencesMap[nextChoice][actProposer];
             nextProposal[actProposer]++;
-            if(actualAccepted[nextChoice] < preferencesMap[nextChoice][actProposer]){
+            if (actualAccepted[nextChoice] < howPreferedIsActForNext){
                 // not accepted has to continue
-            }else{
-                if(actualAccepted[nextChoice] == n){
+            } else {
+                if (actualAccepted[nextChoice] == n){
                     // accepted by someone that is its first proposal
-                    actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
+                    actualAccepted[nextChoice] = howPreferedIsActForNext;
                     finish = true;
-                }else{
+                } else {
                     // accepted by someone that has to reject other proposal
                     int aux = preferencesOrder[nextChoice][actualAccepted[nextChoice]];
-                    actualAccepted[nextChoice] = preferencesMap[nextChoice][actProposer];
+                    actualAccepted[nextChoice] = howPreferedIsActForNext;
                     actProposer = aux;
                 }
             }
-        } while(not finish);
+        } while (not finish);
     }
-    
+
     vvb preStable(n, vb(n-1, true));
-    for(int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i){
         int whoAccepted = preferencesOrder[i][nextProposal[i]-1];
-        for(int j = preferencesMap[whoAccepted][i] +1; j < n-1; ++j){
+        for (int j = preferencesMap[whoAccepted][i] +1; j < n-1; ++j){
             preStable[whoAccepted][j] = false;
             int otherWay = preferencesOrder[whoAccepted][j];
             preStable[otherWay][preferencesMap[otherWay][whoAccepted]] = false;
         }
     }
+
     vvi stable(n);
-    for(int i = 0; i < n; ++i)
-    for(int j = 0; j < n; ++j)
-        if(preStable[i][j])
+    for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j)
+        if (preStable[i][j])
             stable[i].push_back(preferencesOrder[i][j]);
  
-   
-    vi leftPref(n), rightPref(n);
-    for(int& x : leftPref) x = 0;
-    for(int i = 0; i < n; ++i){
-        if(stable[i] == 0){
+    vi leftPref(n, 0), rightPref(n);
+    for (int i = 0; i < n; ++i){
+        if (stable[i].size() == 0){
             hasSolution = false;
             return vii(); 
         }
         rightPref[i] = stable[i].size()-1;
-
     }
-    
+    // JAVIER ENTEN FINS AQUI
     int finish = false;
-    while(not finish){
+    while (not finish){
         finish = true;
-        for(int i = 0; i < n; ++i){
-            if(rightPref[i] != leftPref[i]){
+        int pi = -1;
+        for (int i = 0; i < n; ++i){
+            if (rightPref[i] != leftPref[i]){
                 finish = false;
-                vi visited(n, -1);
-                int pi = i;
-                vi pis;
-                int step = 0;
-
-                while(visited[pi] == -1){
-
-                    pis.push_back(pi);
-                    visited[pi] = step;
-                    step++;
-                    // aixo esta mal:
-                    int qi = stable[pi][leftPref[pi]+1];
-                    pi = stable[qi][rightPref[qi]];
-                }
-
-                for(int j = visited[pi]; j < pis.size(); ++j){
-                    // aixo esta mal:
-                    int ai = pis[j];
-                    leftPref[ai]++;
-                    int bi = stable[ai][leftPref];
-
-                    // is this okey??
-                    while(rightPref[bi] >= leftPref[bi] and stable[bi][rightPref[bi]] != ai){
-                        rightPref[bi]--;
-                   }
-                    // and this?
-                    if(rightPref[bi] < leftPref[bi]){
-                       hasSolution = false;
-                       return vii();     
-                   }
-                    //assert(rightPref[bi] >= 0);
-                    //rightPref[bi]--;
-
-                }
-                for(int i = 0; i < n; ++i)
-                    if(leftPref[i] > rightPref[i]){
-                        hasSolution = false;
-                        return vii();
-                    }
-                
+                pi = i;
                 break;
             }
         }
+        if (pi == -1) break;
+
+        vi visited(n, -1);
+        vi pis;
+        int step = 0;
+
+        while (visited[pi] == -1){
+
+            pis.push_back(pi);
+            visited[pi] = step;
+            step++;
+            // aixo esta mal:
+            int qi = stable[pi][leftPref[pi]+1];
+            pi = stable[qi][rightPref[qi]];
+        }
+
+        DEBUG(pis);
+
+        int initSize = pis.size();
+        reverse(pis.begin(), pis.end());
+        while (pis.size() != initSize - visited[pi]) pis.pop_back();
+        reverse(pis.begin(), pis.end());
+        
+        for (int j = 0; j < pis.size(); ++j){
+            int ai = pis[j];
+            int bi = stable[ai][leftPref[ai]];
+            int ci = stable[ai][leftPref[ai]+1];
+            while (stable[ci][rightPref[ci]] != ai) rightPref[ci]--;
+            leftPref[ai]++;
+            if (rightPref[bi] < leftPref[bi] or rightPref[ai] < leftPref[ai]) {
+                hasSolution = false;
+                return vii();
+            }
+        }
     }
+
     vii pairs;
     hasSolution = true;
-    for(int i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i)
         pairs.push_back(ii({i, stable[i][leftPref[i]]}));
     return pairs;
 }
 
 
 int main(){
-    for(int n = 2; n < 100; n+=2){
-    //int n;
-    //cin >> n; //has to be even
-        cout << "??" << endl;
+    /*
+    int n;
+    cin >> n; //has to be even
+    cout << "??" << endl;
     vvi preferences(n);
-    for(int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i){
         preferences[i] = generateRandomPermutation(n-1, 0);
-        for(int& x : preferences[i]){
-            if(x >= i) x++;
+        for (int& x : preferences[i]){
+            if (x >= i) x++;
             assert(x >= 0 and x < n and x != i);
         }
     }
     cout << "!!" << endl;
-    bool hasSolution;
-   /*n = 6;
-    preferences = vvi(6, vi(5));
-    preferences[0][0] = 2;
+    */
+    int n = 6;
+    vvi preferences(n, vi(n-1));
+
+    preferences[0][0] = 4;
     preferences[0][1] = 6;
-    preferences[0][2] = 4;
-    preferences[0][3] = 3;
-    preferences[0][4] = 5;
-
-    preferences[1][0] = 3;
-    preferences[1][1] = 5;
-    preferences[1][2] = 1;
-    preferences[1][3] = 6;
-    preferences[1][4] = 4;
-
-    preferences[2][0] = 1;
-    preferences[2][1] = 6;
-    preferences[2][2] = 2;
-    preferences[2][3] = 5;
-    preferences[2][4] = 4;
-
-    preferences[3][0] = 5;
-    preferences[3][1] = 2;
-    preferences[3][2] = 3;
-    preferences[3][3] = 6;
-    preferences[3][4] = 1;
-
-    preferences[4][0] = 6;
-    preferences[4][1] = 1;
-    preferences[4][2] = 3;
-    preferences[4][3] = 4;
-    preferences[4][4] = 2;
+    preferences[0][2] = 2;
+    preferences[0][3] = 5;
+    preferences[0][4] = 3;
     
-    preferences[5][0] = 4;
-    preferences[5][1] = 2;
-    preferences[5][2] = 5;
-    preferences[5][3] = 1;
-    preferences[5][4] = 3;*/
+    preferences[1][0] = 6;
+    preferences[1][1] = 3;
+    preferences[1][2] = 5;
+    preferences[1][3] = 1;
+    preferences[1][4] = 4;
+    
+    preferences[2][0] = 4;
+    preferences[2][1] = 5;
+    preferences[2][2] = 1;
+    preferences[2][3] = 6;
+    preferences[2][4] = 2;
+    
+    preferences[3][0] = 2;
+    preferences[3][1] = 6;
+    preferences[3][2] = 5;
+    preferences[3][3] = 1;
+    preferences[3][4] = 3;
+    
+    preferences[4][0] = 4;
+    preferences[4][1] = 2;
+    preferences[4][2] = 3;
+    preferences[4][3] = 6;
+    preferences[4][4] = 1;
+    
+    preferences[5][0] = 5;
+    preferences[5][1] = 1;
+    preferences[5][2] = 4;
+    preferences[5][3] = 2;
+    preferences[5][4] = 3;
 
-    //for(auto& x : preferences)
-    //    for(auto& y : x) y--;
-    cout << n << ": " << endl;
+    for(auto& x : preferences)
+        for(auto& y : x) y--;
+    bool hasSolution;
     vii matches = solveSR(n, preferences, hasSolution);
-    if(hasSolution){
+    if (hasSolution){
         cout << "yes" << endl;
-       /* for(ii x : matches){
-            if(x.F < x.S)
-            cerr << x.F+1 << " <3 " << x.S+1 << endl;
+        for (ii x : matches){
+            if (x.F < x.S) cerr << x.F+1 << " <3 " << x.S+1 << endl;
         }
-*/    }
+    }
     else{
         cerr << "no solution" << endl;
-    }
     }
 }
