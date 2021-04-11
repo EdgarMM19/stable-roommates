@@ -36,13 +36,3 @@ vector<int> generateRandomPermutation(int len, bool startAtOne){
     return v;
 }
 
-/*int main(){
-    for(int i = 1; i < 10; ++i){
-        vector<int> v = generateRandomPermutation(i, 0);
-        for(auto x : v) cout << x << " ";
-        cout << endl;
-        v = generateRandomPermutation(i, 1);
-        for(auto x : v) cout << x << " ";
-        cout << endl;
-    }
-}*/

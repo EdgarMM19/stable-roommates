@@ -57,7 +57,7 @@ map<int,vector<double>> experiment(int n_hab, int n_iter){
             } 
         }
         //Afegim els resultats a l'estructura de dades
-        double prob_real = amb_solucio/num_iteracions;
+        double prob_real = amb_solucio/double(n_iter);
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
@@ -69,8 +69,8 @@ map<int,vector<double>> experiment(int n_hab, int n_iter){
 
 int main(int argc, char** argv){
     srand(0);
-    int n_hab = *argv[1];
-    int n_iter = *argv[2];
+    int n_hab = stoi(argv[1]);
+    int n_iter = stoi(argv[2]);
     map<int,vector<double>> resultats = experiment(n_hab,n_iter);
     for(auto x : resultats){
         //cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
