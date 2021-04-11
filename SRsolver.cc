@@ -78,7 +78,6 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
         for (int j = preferencesMap[whoAccepted][i] +1; j < n-1; ++j){
             preStable[whoAccepted][j] = false;
             int otherWay = preferencesOrder[whoAccepted][j];
-            //cerr << n << " " << j << " " << whoAccepted << " " << otherWay << " " << preferencesMap[otherWay][whoAccepted] << endl;
             preStable[otherWay][preferencesMap[otherWay][whoAccepted]] = false;
         }
 
@@ -121,11 +120,6 @@ bool solveSR(int n, const vvi& preferencesOrder, vii& solution){
             pis.push_back(pi);
             visited[pi] = step;
             step++;
-            if (leftPref[pi] == rightPref[pi]) {
-                cout << "Input basura" << endl;
-                char bas; cin >> bas;
-                return false;
-            }
             int punter = secondPref[pi];
             int qi = stable[pi][punter];
             pi = stable[qi][rightPref[qi]];

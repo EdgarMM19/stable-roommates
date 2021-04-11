@@ -24,23 +24,11 @@ vector<int> generateRandomPermutation(int len, bool startAtOne);
 bool solveSR(int n, const vvi& preferencesOrder, vii& solution);
 bool backSR(int n, const vvi& preferencesOrder);
 
-double Pn (int n){
-    //Pn ~ e*(1/sqrt(pi))*(2/n)^1/4
-    return exp(1.0) * (double)1.0/sqrt(1.0*M_PI) * pow(2.0/n,1.0/4.0);
-}
-
-map<int,vector<double>> experiment(int n_hab, int n_iter, double maxError){
+void correct(int n_hab, int n_iter){
     //Experimentem per conjunts de 2 a num_persones persones
-    map<int,vector<double>> resultats; 
     for (int n = 1; n <= n_hab; ++n){
-        double amb_solucio = 0;
-        //Probabilitat estimada de tenir solució
-        double prob_n = Pn(n);
         //Fem num_iteracions experiments per conjunt
         int niter = n_iter;
-        if(maxError != 0){
-            niter = int(prob_n*(1-prob_n)*16./(maxError*maxError));
-        }
         for (int i = 0; i < niter; ++i){ 
             vvi instancia;
             // Generem la instancia per un experiment en concret
@@ -53,26 +41,18 @@ map<int,vector<double>> experiment(int n_hab, int n_iter, double maxError){
                 instancia.push_back(persona);
             }
             vii possible_sol;
-            if (solveSR(2*n, instancia, possible_sol)) {
-                amb_solucio++;
+            if (solveSR(2*n, instancia, possible_sol) != backSR(2*n, instancia)) {
+                cout << "Problem with n = " << n << endl;
             } 
         }
-        //Afegim els resultats a l'estructura de dades
-        cerr << niter << endl;
-        double prob_real = amb_solucio/double(niter);
-        double error = abs(prob_real-prob_n);
-        vector<double> res = {prob_n,prob_real,error};
-        resultats.insert({n,res});
-        cerr << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
-        cout << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
+        cout << n << " finish!" << endl;
     }
-    return resultats;
 }
 
 int main(int argc, char** argv){
     srand(0);
     int n_hab = stoi(argv[1]);
     int n_iter = stoi(argv[2]);
-    int rang1000 = stoi(argv[3]);
-    map<int,vector<double>> resultats = experiment(n_hab,n_iter, rang1000/1000.0);
+    correct(n_hab,n_iter);
+
 }
