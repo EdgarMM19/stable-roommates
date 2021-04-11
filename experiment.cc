@@ -39,6 +39,7 @@ map<int,vector<double>> experiment(int n_hab, int n_iter, double maxError){
         int niter = n_iter;
         if(maxError != 0){
             niter = int(prob_n*(1-prob_n)*16./(maxError*maxError));
+            if(niter < 0) niter = 1;
         }
         for (int i = 0; i < niter; ++i){ 
             vvi instancia;
