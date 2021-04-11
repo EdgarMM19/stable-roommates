@@ -3,8 +3,7 @@
 #include <map>
 #include <cmath>
 #include <cassert>
-//#include "randomGenerators.cc"
-//#include "SRsolver.cc"
+
 using namespace std;
 
 /*Una instancia aleatoria es una vector de vectores con 
