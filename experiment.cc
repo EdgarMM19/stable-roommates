@@ -32,7 +32,7 @@ double Pn (int n){
     return exp(1.0) * (double)1.0/sqrt(1.0*M_PI) * pow(2.0/n,1.0/4.0);
 }
 
-map<int,vector<double>> experiment(int n_hab, int n_iter){
+map<int,vector<double>> experiment(int n_hab, int n_iter, double maxError){
     //Experimentem per conjunts de 2 a num_persones persones
     map<int,vector<double>> resultats; 
     for (int n = 1; n <= n_hab; ++n){
@@ -40,7 +40,11 @@ map<int,vector<double>> experiment(int n_hab, int n_iter){
         //Probabilitat estimada de tenir solució
         double prob_n = Pn(n);
         //Fem num_iteracions experiments per conjunt
-        for (int i = 0; i < n_iter; ++i){ 
+        int niter = n_iter;
+        if(maxError != 0){
+            niter = int(prob_n*(1-prob_n)*16./(maxError*maxError));
+        }
+        for (int i = 0; i < niter; ++i){ 
             vvi instancia;
             // Generem la instancia per un experiment en concret
             for (int j = 0; j < 2*n; j++){
@@ -57,7 +61,8 @@ map<int,vector<double>> experiment(int n_hab, int n_iter){
             } 
         }
         //Afegim els resultats a l'estructura de dades
-        double prob_real = amb_solucio/double(n_iter);
+        cerr << niter << endl;
+        double prob_real = amb_solucio/double(niter);
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
@@ -71,7 +76,8 @@ int main(int argc, char** argv){
     srand(0);
     int n_hab = stoi(argv[1]);
     int n_iter = stoi(argv[2]);
-    map<int,vector<double>> resultats = experiment(n_hab,n_iter);
+    int rang1000 = stoi(argv[3]);
+    map<int,vector<double>> resultats = experiment(n_hab,n_iter, rang1000/1000.0);
     for(auto x : resultats){
         //cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
     }
