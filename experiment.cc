@@ -32,15 +32,15 @@ double Pn (int n){
     return exp(1.0) * (double)1.0/sqrt(1.0*M_PI) * pow(2.0/n,1.0/4.0);
 }
 
-map<int,vector<double>> experiment(){
-    //Experimentem per conjunts de 2 a 100 persones
+map<int,vector<double>> experiment(int n_hab, int n_iter){
+    //Experimentem per conjunts de 2 a num_persones persones
     map<int,vector<double>> resultats; 
-    for (int n = 1; n <= num_persones; ++n){
+    for (int n = 1; n <= n_hab; ++n){
         double amb_solucio = 0;
         //Probabilitat estimada de tenir solució
         double prob_n = Pn(n);
-        //Fem 20 experiments per conjunt
-        for (int i = 0; i < num_iteracions; ++i){ 
+        //Fem num_iteracions experiments per conjunt
+        for (int i = 0; i < n_iter; ++i){ 
             vvi instancia;
             // Generem la instancia per un experiment en concret
             for (int j = 0; j < 2*n; j++){
@@ -53,36 +53,25 @@ map<int,vector<double>> experiment(){
             }
             vii possible_sol;
             if (solveSR(2*n, instancia, possible_sol)) {
-                //cerr << "yes" << endl;
                 amb_solucio++;
-                //if(not backSR(2*n, instancia)){
-                //    cout << "no nhi ha!" << endl;
-                //}
-                //else cout << "correcte" << endl;
-            } else {
-                //cerr << "no" << endl;
-                //char bas; cin >> bas;
-                //if(backSR(2*n, instancia)){
-                //    cout << "nhi ha!!" << endl;
-                //}
-                //else cout << "correcte" << endl;
-            }
+            } 
         }
         //Afegim els resultats a l'estructura de dades
         double prob_real = amb_solucio/num_iteracions;
         double error = abs(prob_real-prob_n);
         vector<double> res = {prob_n,prob_real,error};
         resultats.insert({n,res});
-        cout << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
         cerr << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
+        cout << n << ", " << prob_n << ", " << prob_real << ", " << error << endl;
     }
     return resultats;
 }
 
-int main(){
+int main(int argc, char** argv){
     srand(0);
-
-    map<int,vector<double>> resultats = experiment();
+    int n_hab = *argv[1];
+    int n_iter = *argv[2];
+    map<int,vector<double>> resultats = experiment(n_hab,n_iter);
     for(auto x : resultats){
         //cout << x.first << " " << x.second[0] << " " << x.second[1] << " " << x.second[2] << endl;
     }
